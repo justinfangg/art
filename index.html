@@ -269,27 +269,34 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%) rotate(-2deg);
-    width: 76%;
-    padding: 6% 7%;
+    width: 82%;
+    padding: 7% 8%;
     background: var(--paper);
     color: var(--ink);
     box-shadow: 0 2px 6px rgba(0,0,0,0.35);
-    font-size: clamp(8px, calc(var(--w) * 0.038), 13px);
+    font-size: clamp(9px, calc(var(--w) * 0.045), 14px);
     line-height: 1.45;
-    text-align: center;
+    display: grid;
+    gap: 0.6em;
   }
   .label strong {
-    display: block;
     font-family: var(--display);
-    font-size: 1.9em;
+    font-size: 1.8em;
     font-weight: 600;
-    letter-spacing: 0.04em;
-    margin-block: 0.15em;
+    line-height: 1;
   }
-  .label span { letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+  .label .roles {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0.6em;
+    border-bottom: 1px solid rgba(34, 32, 27, 0.18);
+    display: grid;
+    gap: 0.15em;
+  }
+  .label p { margin: 0; color: var(--ink-soft); }
+  .label .links { display: grid; gap: 0.2em; }
   .label a {
     display: block;
-    margin-top: 0.3em;
     color: var(--ink);
     text-decoration: underline;
     text-decoration-color: var(--gold-mid);
@@ -417,9 +424,17 @@
               <div class="brace bottom"></div>
               <div class="seal"></div>
               <div class="label">
-                <span>CS @ uWaterloo</span>
                 <strong>Justin Fang</strong>
-                <a href="https://www.linkedin.com/in/justinfangjf" target="_blank" rel="noopener">linkedin.com/in/justinfangjf</a>
+                <ul class="roles">
+                  <li>Computer Science @ University of Waterloo</li>
+                  <li>Software Engineer Intern @ Ciena</li>
+                </ul>
+                <p>Interested in AI, infrastructure and full-stack.</p>
+                <p>I enjoy hiking, listening to music, and playing any and every sport. Challenge me at your own risk.</p>
+                <div class="links">
+                  <a href="https://www.linkedin.com/in/justinfangjf" target="_blank" rel="noopener">linkedin.com/in/justinfangjf</a>
+                  <a href="https://github.com/justinfangg" target="_blank" rel="noopener">github.com/justinfangg</a>
+                </div>
               </div>
               <div class="chalk">J. Fang</div>
             </div>
