@@ -1,0 +1,386 @@
+/* Layout: one gallery room in a single CSS 3D scene. The wall is the focal plane (z = 0),
+   the parquet floor hinges out from the wall's base toward the viewer, and the framed
+   painting hangs a few centimetres off the wall. */
+:root {
+  --wall: #3b6350;
+  --wall-deep: #26432f;
+  --wall-lit: #538470;
+  --skirting: #1f3329;
+  --gold-hi: #fff1b8;
+  --gold: #d4a845;
+  --gold-mid: #a67a26;
+  --gold-lo: #5e400c;
+  --panel: #b98c5a;
+  --panel-dark: #7a5532;
+  --paper: #f3eee2;
+  --ink: #22201b;
+  --ink-soft: #5b564b;
+  --void: #0e1a14;
+
+  --display: "Cormorant Garamond", "Cormorant", Garamond, "Times New Roman", serif;
+  --body: "Jost", "Futura", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+
+  --base: 80vh;                   /* where the wall meets the floor */
+  --w: min(34vh, 56vw);           /* width of the painted surface */
+  --fw: calc(var(--w) * 0.14);    /* frame moulding width */
+  --cw: calc(var(--w) + var(--fw) * 2.24);              /* outer frame width */
+  --ch: calc(var(--w) * 1.5 + var(--fw) * 2.24);        /* outer frame height (1024 × 1536 image) */
+  --d: calc(var(--fw) * 0.55);    /* frame depth */
+  color-scheme: dark;
+}
+
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--void);
+  color: var(--paper);
+  font-family: var(--body);
+  overflow: hidden;
+}
+
+.scene {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  perspective: 130vh;
+  perspective-origin: 50% 42%;
+  background: var(--void);
+}
+.world, .world * { transform-style: preserve-3d; }
+.world { position: absolute; inset: 0; }
+
+/* ---------- wall ---------- */
+.wall {
+  position: absolute;
+  left: -10vw; right: -10vw; top: 0;
+  height: var(--base);
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.35), transparent 18%, transparent 82%, rgba(0,0,0,0.45)),
+    radial-gradient(ellipse 38% 55% at 50% 42%, rgba(255, 236, 190, 0.22), transparent 70%),
+    radial-gradient(ellipse 90% 100% at 50% 35%, var(--wall-lit), var(--wall) 45%, var(--wall-deep) 100%);
+}
+.wall::before {               /* fabric wall covering: faint weave */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.05) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 4px);
+}
+
+/* skirting board: a shallow box standing proud of the wall */
+.skirting {
+  position: absolute;
+  left: -10vw; right: -10vw;
+  top: calc(var(--base) - 3.2vh);
+  height: 3.2vh;
+  transform: translateZ(1.4vh);
+  background: linear-gradient(180deg, #2a4437, var(--skirting) 30%, #12201a);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.skirting::before {           /* top cap, folding back to the wall */
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 1.4vh;
+  transform-origin: top;
+  transform: rotateX(-90deg);
+  background: linear-gradient(180deg, #355445, #2a4437);
+}
+
+/* ---------- floor ---------- */
+.floor {
+  position: absolute;
+  left: -60vw; right: -60vw;
+  top: var(--base);
+  height: 110vh;
+  transform-origin: top center;
+  transform: rotateX(90deg);
+  background-color: #4a321f;
+  background-size: auto, auto, auto, 30vh 30vh;
+}
+.floor::after {               /* shading: contact shadow at the wall, light pool, falloff toward the viewer */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.75) 0, rgba(0,0,0,0.25) 1.2%, transparent 4%),
+    radial-gradient(ellipse 14% 7% at 50% 2%, rgba(255, 228, 175, 0.28), transparent 100%),
+    linear-gradient(90deg, rgba(0,0,0,0.55), transparent 35%, transparent 65%, rgba(0,0,0,0.55)),
+    linear-gradient(180deg, transparent 8%, rgba(0,0,0,0.45) 30%);
+}
+
+/* ---------- painting ---------- */
+.hang {
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: calc(var(--base) - 3.2vh);
+  display: grid;
+  place-items: center;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.stage { position: relative; width: var(--cw); height: var(--ch); }
+
+.shadow {
+  position: absolute;
+  inset: 3%;
+  background: rgba(5, 12, 8, 0.8);
+  filter: blur(20px);
+  border-radius: 6px;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+.card {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+}
+.card.dragging { cursor: grabbing; }
+.card:focus-visible .frame { outline: 3px solid var(--paper); outline-offset: 4px; }
+
+.face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.front { transform: translateZ(calc(var(--d) / 2)); }
+.front * { transform-style: flat; }
+
+/* the four edges of the frame, so it has thickness when it turns */
+.edge { position: absolute; }
+.edge.l, .edge.r {
+  top: 0; height: 100%;
+  width: var(--d);
+  left: calc(50% - var(--d) / 2);
+  background: linear-gradient(180deg, var(--gold-mid), var(--gold-lo) 40%, var(--gold-mid) 70%, var(--gold-lo));
+}
+.edge.r { transform: rotateY(90deg) translateZ(calc(var(--cw) / 2)); }
+.edge.l { transform: rotateY(-90deg) translateZ(calc(var(--cw) / 2)); filter: brightness(0.8); }
+.edge.t, .edge.b {
+  left: 0; width: 100%;
+  height: var(--d);
+  top: calc(50% - var(--d) / 2);
+  background: linear-gradient(90deg, var(--gold-lo), var(--gold) 30%, var(--gold-hi) 50%, var(--gold) 70%, var(--gold-lo));
+}
+.edge.t { transform: rotateX(90deg) translateZ(calc(var(--ch) / 2)); }
+.edge.b { transform: rotateX(-90deg) translateZ(calc(var(--ch) / 2)); filter: brightness(0.55); }
+
+.frame {
+  position: absolute;
+  inset: 0;
+  padding: var(--fw);
+  background:
+    linear-gradient(135deg,
+      var(--gold-lo) 0%, var(--gold) 14%, var(--gold-hi) 24%, var(--gold-mid) 38%,
+      var(--gold-lo) 50%, var(--gold) 64%, var(--gold-hi) 76%, var(--gold-mid) 90%, var(--gold-lo) 100%);
+  box-shadow:
+    inset 0 0 0 2px var(--gold-lo),
+    inset 0 0 0 5px var(--gold-hi),
+    inset 0 0 0 8px var(--gold-mid),
+    inset 0 0 calc(var(--fw) * 0.5) rgba(60, 35, 0, 0.6);
+}
+.frame::before {              /* carved bead band running round the moulding */
+  content: "";
+  position: absolute;
+  inset: calc(var(--fw) * 0.24);
+  border: calc(var(--fw) * 0.22) solid transparent;
+  border-image: repeating-linear-gradient(45deg,
+    var(--gold-hi) 0 3px, var(--gold) 3px 5px, var(--gold-lo) 5px 7px, var(--gold-mid) 7px 9px) 1;
+  box-shadow:
+    0 0 0 1px rgba(70, 45, 5, 0.7),
+    inset 0 0 0 1px rgba(70, 45, 5, 0.7);
+  opacity: 0.9;
+  pointer-events: none;
+}
+.sight {                      /* thin bevel where the gilding meets the panel */
+  position: relative;
+  padding: calc(var(--fw) * 0.12);
+  background: linear-gradient(135deg, var(--gold-hi), var(--gold-mid) 50%, var(--gold-lo));
+  box-shadow: inset 0 2px 6px rgba(40, 20, 0, 0.6);
+}
+.sight img {
+  display: block;
+  width: var(--w);
+  max-width: none;
+  aspect-ratio: 1024 / 1536;
+  object-fit: cover;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+.varnish {
+  position: absolute;
+  inset: calc(var(--fw) * 0.12);
+  background: radial-gradient(ellipse at 50% 40%, transparent 55%, rgba(30, 20, 5, 0.35));
+  box-shadow: inset 0 calc(var(--fw) * 0.12) calc(var(--fw) * 0.2) rgba(20, 10, 0, 0.55);
+  pointer-events: none;
+}
+.glare {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 30%),
+    rgba(255, 250, 230, 0.55), rgba(255, 250, 230, 0.12) 28%, transparent 55%);
+  mix-blend-mode: soft-light;
+  opacity: var(--go, 0);
+  pointer-events: none;
+}
+
+/* back: poplar panel and frame reverse */
+.back {
+  transform: translateZ(calc(var(--d) / -2)) rotateY(180deg);
+  padding: calc(var(--fw) * 0.55);
+  background: linear-gradient(135deg, #3a2611, #5a3c1c 40%, #2e1d0c);
+  box-shadow: inset 0 0 0 2px #1d1206, inset 0 0 18px rgba(0,0,0,0.6);
+}
+.back * { transform-style: flat; }
+.panel {
+  position: relative;
+  height: 100%;
+  background:
+    repeating-linear-gradient(90deg, rgba(60, 35, 10, 0.18) 0 1px, transparent 1px 7px),
+    repeating-linear-gradient(88deg, rgba(255, 230, 190, 0.08) 0 2px, transparent 2px 19px),
+    linear-gradient(90deg, var(--panel-dark), var(--panel) 30%, #c79b68 55%, var(--panel) 80%, var(--panel-dark));
+  box-shadow: inset 0 0 24px rgba(40, 20, 0, 0.55);
+  overflow: hidden;
+}
+.brace {
+  position: absolute;
+  left: -2%; right: -2%;
+  height: 7%;
+  background: linear-gradient(180deg, #8a5f36, #6a4523 60%, #4a2f16);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.45);
+}
+.brace.top { top: 18%; }
+.brace.bottom { bottom: 18%; }
+.label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-2deg);
+  width: 82%;
+  padding: 7% 8%;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+  font-size: clamp(9px, calc(var(--w) * 0.045), 14px);
+  line-height: 1.45;
+  display: grid;
+  gap: 0.6em;
+}
+.label strong {
+  font-family: var(--display);
+  font-size: 1.8em;
+  font-weight: 600;
+  line-height: 1;
+}
+.label .roles {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0.6em;
+  border-bottom: 1px solid rgba(34, 32, 27, 0.18);
+  display: grid;
+  gap: 0.15em;
+}
+.label p { margin: 0; color: var(--ink-soft); }
+.label .links { display: grid; gap: 0.2em; }
+.label a {
+  display: block;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--gold-mid);
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.label a:focus-visible { outline: 2px solid var(--gold-mid); outline-offset: 2px; }
+.chalk {
+  position: absolute;
+  left: 10%;
+  bottom: 6%;
+  font-family: var(--display);
+  font-style: italic;
+  font-size: clamp(10px, calc(var(--w) * 0.07), 22px);
+  color: rgba(250, 245, 235, 0.7);
+  transform: rotate(-6deg);
+}
+.seal {
+  position: absolute;
+  right: 12%;
+  top: 7%;
+  width: 13%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #c2412f, #7d1a10 70%);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+/* ---------- wall placard, mounted on a thin block ---------- */
+.placard {
+  position: absolute;
+  left: calc(100% + clamp(28px, 5vw, 72px));
+  bottom: 6%;
+  width: 15rem;
+  padding: 1.25rem 1.4rem 1.3rem;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 4px 12px 20px rgba(0,0,0,0.4);
+  display: grid;
+  gap: 0.3rem;
+  transform: translateZ(6px);
+  pointer-events: none;
+}
+.placard * { transform-style: flat; }
+.placard h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.9rem;
+  line-height: 1;
+  text-wrap: balance;
+}
+.placard p { margin: 0; }
+.placard .work { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.placard .work b { font-weight: 600; }
+.placard .note {
+  margin-top: 0.6rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(34, 32, 27, 0.18);
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+}
+.placard a {
+  pointer-events: auto;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--gold-mid);
+  text-underline-offset: 3px;
+}
+.placard a:hover { text-decoration-thickness: 2px; }
+.placard a:focus-visible { outline: 2px solid var(--gold-mid); outline-offset: 2px; }
+
+/* phones held upright: hang the painting a little higher and put the card underneath */
+@media (max-width: 900px) and (orientation: portrait) {
+  :root { --w: min(28vh, 56vw); }
+  .hang { place-items: start center; padding-top: 6vh; }
+  .placard {
+    left: 50%;
+    top: calc(100% + 4.5vh);
+    bottom: auto;
+    width: min(17rem, 80vw);
+    padding: 0.8rem 1rem 0.9rem;
+    justify-items: center;
+    text-align: center;
+    transform: translateX(-50%) translateZ(6px);
+  }
+  .placard h1 { font-size: 1.6rem; }
+}
+@media (max-width: 900px) and (orientation: landscape) {
+  .placard { width: 12rem; }
+}
