@@ -91,23 +91,24 @@ body {
 /* ---------- floor ---------- */
 .floor {
   position: absolute;
-  left: -60vw; right: -60vw;
+  left: -10vw; right: -10vw;
   top: var(--base);
-  height: 110vh;
+  height: 55vh;                 /* only as deep as the screen shows; a deeper plane makes a huge GPU layer */
   transform-origin: top center;
   transform: rotateX(90deg);
   background-color: #4a321f;
   background-size: auto, auto, auto, 30vh 30vh;
+  background-position: 0 0, -50vw 0;   /* keep the planks where they were when the floor was wider */
 }
 .floor::after {               /* shading: contact shadow at the wall, light pool, falloff toward the viewer */
   content: "";
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(0,0,0,0.75) 0, rgba(0,0,0,0.25) 1.2%, transparent 4%),
-    radial-gradient(ellipse 14% 7% at 50% 2%, rgba(255, 228, 175, 0.28), transparent 100%),
-    linear-gradient(90deg, rgba(0,0,0,0.55), transparent 35%, transparent 65%, rgba(0,0,0,0.55)),
-    linear-gradient(180deg, transparent 8%, rgba(0,0,0,0.45) 30%);
+    linear-gradient(180deg, rgba(0,0,0,0.75) 0, rgba(0,0,0,0.25) 2.4%, transparent 8%),
+    radial-gradient(ellipse 26% 14% at 50% 4%, rgba(255, 228, 175, 0.28), transparent 100%),
+    linear-gradient(90deg, rgba(0,0,0,0.25), transparent 22%, transparent 78%, rgba(0,0,0,0.25)),
+    linear-gradient(180deg, transparent 16%, rgba(0,0,0,0.45) 60%);
 }
 
 /* ---------- painting ---------- */

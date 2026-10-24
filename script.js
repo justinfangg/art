@@ -55,7 +55,7 @@
       }
     }
     floor.style.backgroundImage =
-      `linear-gradient(180deg, rgba(255,240,210,0.07), transparent 12%), url(${c.toDataURL("image/jpeg", 0.85)})`;
+      `linear-gradient(180deg, rgba(255,240,210,0.07), transparent 24%), url(${c.toDataURL("image/jpeg", 0.85)})`;
     floor.style.backgroundSize = "auto, 30vh 30vh";
   }
   paintFloor();
