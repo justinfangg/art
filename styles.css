@@ -46,7 +46,8 @@ body {
   perspective-origin: 50% 42%;
   background: var(--void);
 }
-.world, .world * { transform-style: preserve-3d; }
+/* only the chain that holds 3D children keeps depth; everything else stays flat */
+.world, .hang, .stage, .card, .skirting { transform-style: preserve-3d; }
 .world { position: absolute; inset: 0; }
 
 /* ---------- wall ---------- */
@@ -129,14 +130,12 @@ body {
   background: rgba(5, 12, 8, 0.8);
   filter: blur(20px);
   border-radius: 6px;
-  will-change: transform, opacity;
   pointer-events: none;
 }
 
 .card {
   position: absolute;
   inset: 0;
-  will-change: transform;
   cursor: grab;
   touch-action: none;
   user-select: none;
@@ -153,7 +152,6 @@ body {
   -webkit-backface-visibility: hidden;
 }
 .front { transform: translateZ(calc(var(--d) / 2)); }
-.front * { transform-style: flat; }
 
 /* the four edges of the frame, so it has thickness when it turns */
 .edge { position: absolute; }
@@ -240,7 +238,6 @@ body {
   background: linear-gradient(135deg, #3a2611, #5a3c1c 40%, #2e1d0c);
   box-shadow: inset 0 0 0 2px #1d1206, inset 0 0 18px rgba(0,0,0,0.6);
 }
-.back * { transform-style: flat; }
 .panel {
   position: relative;
   height: 100%;
@@ -337,7 +334,6 @@ body {
   transform: translateZ(6px);
   pointer-events: none;
 }
-.placard * { transform-style: flat; }
 .placard h1 {
   margin: 0;
   font-family: var(--display);

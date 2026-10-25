@@ -103,7 +103,8 @@
     const f = P / (P - zNow);              // how much nearer things are magnified
     const halfW = (w + w * 0.14 * 2.24) / 2;
     const swing = Math.abs(Math.sin(s.rz * Math.PI / 180)) * halfW + Math.abs(s.rx) * 1.5;
-    return (floorY - oy) / f - (restBottom - oy) - swing - 4;
+    // never below 0: the painting's own hanging spot is always allowed, even if a measurement is off
+    return Math.max(0, (floorY - oy) / f - (restBottom - oy) - swing - 4);
   }
 
   function spring(key, target, k, d, dt) {
